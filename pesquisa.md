@@ -1,4 +1,4 @@
-# PESQUISA
+# Pesquisa
 
 **Grupo:** Filipe Gomes, João Miguel, Arthur Chave - 3º AI - ETECAMP  
 **Tema Escolhido:** Tema 1 — Biblioteca  
