@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca ETECAMP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-subtle: #eef2ff;
+      --primary-border: #c7d2fe;
+      
+      --accent: #d97706;
+      --accent-subtle: #fef3c7;
+      
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-hover: #f1f5f9;
+      --surface-border: #e2e8f0;
+      
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      
+      --success: #10b981;
+      --success-subtle: #ecfdf5;
+      --success-border: #a7f3d0;
+      --success-text: #047857;
+      
+      --danger: #ef4444;
+      --danger-subtle: #fef2f2;
+      --danger-border: #fecaca;
+      --danger-text: #b91c1c;
+      
+      --tag-admin: #7c3aed;
+      --tag-admin-subtle: #f5f3ff;
+      --tag-user: #0284c7;
+      --tag-user-subtle: #f0f9ff;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* TOP NAVBAR */
+    header {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--primary), #818cf8);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .brand-title h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge-admin {
+      background: var(--tag-admin-subtle);
+      color: var(--tag-admin);
+      border: 1px solid #ddd6fe;
+    }
+    .badge-user {
+      background: var(--tag-user-subtle);
+      color: var(--tag-user);
+      border: 1px solid #bae6fd;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 8px rgba(79, 70, 229, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      border-color: var(--surface-border);
+      color: var(--text);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: #cbd5e1;
+    }
+    .btn-danger {
+      background: var(--danger-subtle);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* TOAST ALERTS */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 420px;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background: white;
+      box-shadow: var(--shadow-lg);
+      border-left: 4px solid;
+      font-size: 0.9rem;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-success { border-color: var(--success); color: #065f46; background: var(--success-subtle); }
+    .toast-error { border-color: var(--danger); color: #991b1b; background: var(--danger-subtle); }
+    .toast-info { border-color: var(--primary); color: #3730a3; background: var(--primary-subtle); }
+
+    /* CARDS & GRIDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+    }
+    @media (max-width: 960px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* AUTH VIEW */
+    .auth-card {
+      max-width: 460px;
+      margin: 40px auto;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      border: 1px solid var(--surface-border);
+    }
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    .auth-tab-btn {
+      padding: 14px 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .auth-tab-btn.active {
+      background: var(--surface);
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .auth-body {
+      padding: 28px;
+      background: var(--surface);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-light);
+      pointer-events: none;
+      display: flex;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 14px 10px 40px;
+      font-size: 0.92rem;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fafafa;
+    }
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+      background: white;
+    }
+
+    /* QUICK USERS BAR */
+    .quick-users {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--surface-border);
+    }
+    .quick-users-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chip-btn {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--surface-border);
+      background: #f8fafc;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .chip-btn:hover {
+      background: white;
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* STATS BAR (3 CARDS) */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-val {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* BOOK / LOAN ITEM CARDS */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s ease;
+    }
+    .item-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .item-cover {
+      width: 42px;
+      height: 52px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--primary), #818cf8);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .item-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .item-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .stock-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .stock-available { background: var(--success-subtle); color: var(--success-text); }
+    .stock-empty { background: var(--danger-subtle); color: var(--danger-text); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      max-width: 440px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    /* FOOTER */
+    footer {
+      margin-top: auto;
+      padding: 24px 0 8px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--surface-border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div class="container">
+    
+    <!-- TOP HEADER -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">
+          <!-- BookOpen SVG -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+        </div>
+        <div class="brand-title">
+          <h1>Biblioteca ETECAMP</h1>
+        </div>
+      </div>
+
+      <div id="userProfileHeader" class="user-profile">
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Não autenticado</span>
+      </div>
+    </header>
+
+    <!-- TELA 1: LOGIN / CADASTRO -->
+    <div id="authView" class="auth-card">
+      <div class="auth-tabs">
+        <button id="tabBtnLogin" class="auth-tab-btn active" onclick="trocarAba('login')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          Entrar na Conta
+        </button>
+        <button id="tabBtnRegister" class="auth-tab-btn" onclick="trocarAba('register')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          Cadastrar Leitor
+        </button>
+      </div>
+
+      <div class="auth-body">
+        <!-- FORMULÁRIO DE LOGIN -->
+        <form id="formLogin">
+          <div class="form-group">
+            <label for="loginEmail">E-mail</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </span>
+              <input type="email" id="loginEmail" class="form-input" placeholder="Digite seu e-mail" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="loginSenha">Senha</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <input type="password" id="loginSenha" class="form-input" placeholder="Digite sua senha" required>
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubmitLogin" class="btn btn-primary" style="width: 100%; padding: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            Entrar
+          </button>
+
+          <!-- ATALHO SOMENTE PARA A CONTA ADMIN -->
+          <div class="quick-users">
+            <div class="quick-users-title">
+              <span>Acesso de Demonstração:</span>
+              <span style="font-weight: 500; font-size: 0.72rem;">Senha: Senha123</span>
+            </div>
+            <button type="button" class="chip-btn" onclick="preencherLogin('admin@biblioteca.com')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+              Preencher como Administrador (admin@biblioteca.com)
+            </button>
+          </div>
+        </form>
+
+        <!-- FORMULÁRIO DE REGISTRO -->
+        <form id="formRegister" style="display: none;">
+          <div class="form-group">
+            <label for="regNome">Nome Completo</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </span>
+              <input type="text" id="regNome" class="form-input" placeholder="Seu nome completo" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="regEmail">E-mail</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </span>
+              <input type="email" id="regEmail" class="form-input" placeholder="seuemail@exemplo.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="regSenha">Senha (Mínimo 6 caracteres)</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <input type="password" id="regSenha" class="form-input" placeholder="Pelo menos 6 caracteres" minlength="6" required>
+            </div>
+          </div>
+
+          <button type="submit" id="btnSubmitRegister" class="btn btn-primary" style="width: 100%; padding: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            Criar Cadastro de Leitor
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TELA 2: APLICAÇÃO LOGADA -->
+    <div id="mainAppView" style="display: none;">
+      
+      <!-- STATS BAR (3 CARDS) -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #e0e7ff; color: #4338ca;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          </div>
+          <div>
+            <div id="statTotalLivros" class="stat-val">0</div>
+            <div class="stat-label">Títulos no Acervo</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #dcfce7; color: #15803d;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div>
+            <div id="statDisponiveis" class="stat-val">0</div>
+            <div class="stat-label">Exemplares Livres</div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon" style="background: #fef3c7; color: #b45309;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div>
+            <div id="statMeusEmprestimos" class="stat-val">0</div>
+            <div id="statEmprestimosLabel" class="stat-label">Meus Empréstimos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAINEL EXCLUSIVO DO ADMIN: CADASTRAR NOVO LIVRO -->
+      <div id="adminCadastroCard" class="card" style="display: none; border-left: 4px solid var(--tag-admin);">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--tag-admin)" stroke-width="2.2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+            Cadastrar Novo Livro no Acervo
+          </div>
+          <span class="badge badge-admin">ADMIN</span>
+        </div>
+        <form id="formCriarLivro" style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 100px auto; gap: 12px; align-items: end;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Título da Obra</label>
+            <input type="text" id="novoTitulo" class="form-input" style="padding-left: 12px;" placeholder="ex: O Cortiço" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Autor / Escritor</label>
+            <input type="text" id="novoAutor" class="form-input" style="padding-left: 12px;" placeholder="ex: Aluísio Azevedo" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>ISBN (Opcional)</label>
+            <input type="text" id="novoIsbn" class="form-input" style="padding-left: 12px;" placeholder="978-85...">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Exemplares</label>
+            <input type="number" id="novaQtd" class="form-input" style="padding-left: 12px;" value="3" min="1" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="height: 42px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Adicionar
+          </button>
+        </form>
+      </div>
+
+      <!-- GRADE PRINCIPAL: LIVROS E EMPRÉSTIMOS -->
+      <div class="grid-2">
+        
+        <!-- COLUNA 1: ACERVO DE LIVROS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+              Acervo de Livros
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="carregarLivros()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Atualizar
+            </button>
+          </div>
+
+          <!-- FILTRO RÁPIDO DE LIVROS -->
+          <div style="margin-bottom: 16px;">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </span>
+              <input type="text" id="filtroLivros" class="form-input" placeholder="Buscar por título ou autor..." oninput="filtrarAcervo()">
+            </div>
+          </div>
+
+          <div id="livrosList" class="item-list">Carregando acervo...</div>
+        </div>
+
+        <!-- COLUNA 2: EMPRÉSTIMOS ATIVOS / HISTÓRICO -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span id="tituloEmprestimos">Empréstimos</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="carregarEmprestimos()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Atualizar
+            </button>
+          </div>
+
+          <div id="emprestimosList" class="item-list">Carregando empréstimos...</div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- MODAL: TROCAR SENHA (PATCH /auth/senha) -->
+  <div id="modalSenha" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text);">Alterar Senha</h3>
+        <button onclick="fecharModalSenha()" style="background:none; border:none; cursor:pointer; color:var(--text-muted);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="formTrocarSenha">
+        <div class="form-group">
+          <label>Senha Atual</label>
+          <input type="password" id="senhaAtualInput" class="form-input" style="padding-left: 12px;" required>
+        </div>
+        <div class="form-group">
+          <label>Nova Senha (Mínimo 6 caracteres)</label>
+          <input type="password" id="novaSenhaInput" class="form-input" style="padding-left: 12px;" minlength="6" required>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="fecharModalSenha()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Senha</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      ETEC de Campo Limpo Paulista — ETECAMP · 3º AI
+    </div>
+  </footer>
+
+  <script>
+    let token = localStorage.getItem("token") || null;
+    let usuarioAtual = null;
+    let acervoCompleto = [];
+
+    // SISTEMA DE ALERTA TOAST
+    function mostrarToast(mensagem, tipo = "info") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${tipo}`;
+      
+      let icon = "";
+      if (tipo === "success") {
+        icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+      } else if (tipo === "error") {
+        icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        icon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+      }
+
+      toast.innerHTML = `${icon} <span>${mensagem}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(100%)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 4200);
+    }
+
+    // ALTERNAR ABAS DE LOGIN / CADASTRO
+    function trocarAba(aba) {
+      const formLogin = document.getElementById("formLogin");
+      const formRegister = document.getElementById("formRegister");
+      const tabLogin = document.getElementById("tabBtnLogin");
+      const tabRegister = document.getElementById("tabBtnRegister");
+
+      if (aba === "login") {
+        formLogin.style.display = "block";
+        formRegister.style.display = "none";
+        tabLogin.classList.add("active");
+        tabRegister.classList.remove("active");
+      } else {
+        formLogin.style.display = "none";
+        formRegister.style.display = "block";
+        tabLogin.classList.remove("active");
+        tabRegister.classList.add("active");
+      }
+    }
+
+    // PREENCHIMENTO RÁPIDO PARA DEMONSTRAÇÃO DO ADMIN
+    function preencherLogin(email) {
+      trocarAba("login");
+      document.getElementById("loginEmail").value = email;
+      document.getElementById("loginSenha").value = "Senha123";
+      mostrarToast(`Credenciais de Administrador preenchidas!`, "info");
+    }
+
+    // SUBMIT DO LOGIN
+    document.getElementById("formLogin").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const senha = document.getElementById("loginSenha").value;
+
+      try {
+        const res = await fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, senha })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || "Falha na autenticação");
+
+        token = data.token;
+        localStorage.setItem("token", token);
+        mostrarToast("Autenticado com sucesso! Carregando dados...", "success");
+        await iniciarAplicacao();
+      } catch (err) {
+        mostrarToast(err.message, "error");
+      }
+    });
+
+    // SUBMIT DO CADASTRO (POST /auth/register)
+    document.getElementById("formRegister").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById("regNome").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const senha = document.getElementById("regSenha").value;
+
+      try {
+        const res = await fetch("/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome, email, senha })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || "Falha no cadastro");
+
+        mostrarToast("Cadastro realizado com sucesso! Efetuando login...", "success");
+
+        // Login automático imediato
+        const loginRes = await fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, senha })
+        });
+        const loginData = await loginRes.json();
+        token = loginData.token;
+        localStorage.setItem("token", token);
+        await iniciarAplicacao();
+      } catch (err) {
+        mostrarToast(err.message, "error");
+      }
+    });
+
+    // LOGOUT
+    function encerrarSessao() {
+      token = null;
+      usuarioAtual = null;
+      localStorage.removeItem("token");
+      document.getElementById("authView").style.display = "block";
+      document.getElementById("mainAppView").style.display = "none";
+      document.getElementById("userProfileHeader").innerHTML = `
+        <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Não autenticado</span>
+      `;
+      mostrarToast("Sessão finalizada.", "info");
+    }
+
+    // INICIALIZAÇÃO DA SESSÃO LOGADA (/auth/me)
+    async function iniciarAplicacao() {
+      if (!token) return;
+      try {
+        const res = await fetch("/auth/me", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Sessão inválida ou expirada.");
+        usuarioAtual = await res.json();
+
+        const ehAdmin = usuarioAtual.role === "ADMIN";
+        const roleBadge = ehAdmin
+          ? `<span class="badge badge-admin">
+               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+               ADMINISTRADOR
+             </span>`
+          : `<span class="badge badge-user">
+               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+               LEITOR
+             </span>`;
+
+        document.getElementById("userProfileHeader").innerHTML = `
+          <div style="text-align: right; line-height: 1.2;">
+            <div style="font-size: 0.88rem; font-weight: 700; color: var(--text);">${usuarioAtual.nome}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${usuarioAtual.email}</div>
+          </div>
+          ${roleBadge}
+          <button class="btn btn-secondary btn-sm" onclick="abrirModalSenha()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Trocar Senha
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="encerrarSessao()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Sair
+          </button>
+        `;
+
+        // Alterna telas
+        document.getElementById("authView").style.display = "none";
+        document.getElementById("mainAppView").style.display = "block";
+
+        const adminCadastroCard = document.getElementById("adminCadastroCard");
+        const tituloEmprestimos = document.getElementById("tituloEmprestimos");
+        const statEmprestimosLabel = document.getElementById("statEmprestimosLabel");
+
+        if (ehAdmin) {
+          adminCadastroCard.style.display = "block";
+          tituloEmprestimos.textContent = "Todos os Empréstimos Ativos";
+          statEmprestimosLabel.textContent = "Empréstimos Globais";
+        } else {
+          adminCadastroCard.style.display = "none";
+          tituloEmprestimos.textContent = "Meus Empréstimos";
+          statEmprestimosLabel.textContent = "Meus Empréstimos";
+        }
+
+        await carregarLivros();
+        await carregarEmprestimos();
+      } catch (err) {
+        encerrarSessao();
+      }
+    }
+
+    // CARREGAR ACERVO DE LIVROS (GET /livros)
+    async function carregarLivros() {
+      const container = document.getElementById("livrosList");
+      try {
+        const res = await fetch("/livros");
+        acervoCompleto = await res.json();
+        renderizarLivros(acervoCompleto);
+      } catch (err) {
+        container.innerHTML = `<p style="color:var(--danger-text); padding: 12px 0;">Erro ao sincronizar acervo.</p>`;
+      }
+    }
+
+    function renderizarLivros(livros) {
+      const container = document.getElementById("livrosList");
+      const ehAdmin = usuarioAtual?.role === "ADMIN";
+
+      // Filtro para o Leitor: oculta livros que ele já retirou e ainda não devolveu
+      const livrosExibidos = ehAdmin
+        ? livros
+        : livros.filter(l => !l.leitoresComLivro?.includes(usuarioAtual?.id));
+
+      // Atualiza contadores
+      document.getElementById("statTotalLivros").textContent = livros.length;
+      const totalDisponiveis = livros.reduce((acc, curr) => acc + (curr.disponivel || 0), 0);
+      document.getElementById("statDisponiveis").textContent = totalDisponiveis;
+
+      if (livrosExibidos.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 24px; text-align: center; color: var(--text-muted); background: #fafafa; border-radius: var(--radius-md);">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin-bottom: 8px; opacity: 0.6;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <p style="font-weight: 600;">Nenhum livro disponível no momento.</p>
+            <p style="font-size: 0.8rem; margin-top: 4px;">Você já retirou todos os títulos disponíveis ou o acervo está vazio.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = livrosExibidos.map(l => {
+        const semExemplares = l.disponivel <= 0;
+        return `
+          <div class="item-card">
+            <div class="item-cover">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </div>
+            <div class="item-details">
+              <div class="item-title">${l.titulo}</div>
+              <div class="item-meta">
+                <span>Por <strong>${l.autor}</strong></span>
+                ${l.isbn ? `<span>· ISBN: ${l.isbn}</span>` : ''}
+              </div>
+              <div style="margin-top: 6px;">
+                <span class="stock-indicator ${semExemplares ? 'stock-empty' : 'stock-available'}">
+                  ${semExemplares ? '⚠️ Esgotado' : `✅ ${l.disponivel} de ${l.quantidadeTotal} disponíveis`}
+                </span>
+              </div>
+            </div>
+            <div>
+              ${!ehAdmin ? `
+                <button class="btn btn-primary btn-sm" ${semExemplares ? 'disabled' : ''} onclick="solicitarEmprestimo(${l.id})">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+                  ${semExemplares ? 'Indisponível' : 'Retirar Livro'}
+                </button>
+              ` : `
+                <button class="btn btn-danger btn-sm" onclick="deletarLivro(${l.id})">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  Excluir
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function filtrarAcervo() {
+      const termo = document.getElementById("filtroLivros").value.toLowerCase();
+      const filtrados = acervoCompleto.filter(l => 
+        l.titulo.toLowerCase().includes(termo) || l.autor.toLowerCase().includes(termo)
+      );
+      renderizarLivros(filtrados);
+    }
+
+    // CARREGAR EMPRÉSTIMOS (GET /emprestimos)
+    async function carregarEmprestimos() {
+      const container = document.getElementById("emprestimosList");
+      const ehAdmin = usuarioAtual?.role === "ADMIN";
+
+      try {
+        const res = await fetch("/emprestimos", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const emprestimos = await res.json();
+
+        // Atualiza estatística de empréstimos
+        const ativos = emprestimos.filter(e => !e.devolvido);
+        document.getElementById("statMeusEmprestimos").textContent = ativos.length;
+
+        if (emprestimos.length === 0) {
+          container.innerHTML = `
+            <div style="padding: 24px; text-align: center; color: var(--text-muted); background: #fafafa; border-radius: var(--radius-md);">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin-bottom: 8px; opacity: 0.6;"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              <p style="font-weight: 600;">Nenhum empréstimo registrado.</p>
+              <p style="font-size: 0.8rem; margin-top: 4px;">Retire um livro do acervo ao lado para iniciar um empréstimo.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = emprestimos.map(emp => {
+          const pertenceAoUsuario = emp.leitorId === usuarioAtual?.id;
+          const statusText = emp.devolvido ? "Devolvido ao Acervo" : "Com você (Em andamento)";
+          const dataFmt = new Date(emp.dataEmprestimo).toLocaleDateString('pt-BR');
+
+          return `
+            <div class="item-card">
+              <div class="item-cover" style="background: ${emp.devolvido ? '#94a3b8' : 'linear-gradient(135deg, #10b981, #059669)'};">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              </div>
+              <div class="item-details">
+                <div class="item-title">${emp.livro?.titulo || `Livro #${emp.livroId}`}</div>
+                <div class="item-meta">
+                  ${ehAdmin ? `<span>Leitor: <strong>${emp.leitor?.nome || 'ID ' + emp.leitorId}</strong></span> · ` : ''}
+                  <span>Retirado em: ${dataFmt}</span>
+                </div>
+                <div style="margin-top: 6px;">
+                  <span class="stock-indicator" style="background: ${emp.devolvido ? '#ecfdf5' : '#fef3c7'}; color: ${emp.devolvido ? '#065f46' : '#b45309'};">
+                    ${statusText}
+                  </span>
+                </div>
+              </div>
+              <div>
+                ${(!emp.devolvido && (!ehAdmin || pertenceAoUsuario)) ? `
+                  <button class="btn btn-secondary btn-sm" onclick="devolverEmprestimo(${emp.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                    Devolver
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (err) {
+        container.innerHTML = `<p style="color:var(--danger-text); padding: 12px 0;">Erro ao consultar empréstimos.</p>`;
+      }
+    }
+
+    // RETIRAR LIVRO (POST /emprestimos)
+    async function solicitarEmprestimo(livroId) {
+      try {
+        const res = await fetch("/emprestimos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ livroId })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || "Falha na retirada do livro");
+
+        mostrarToast("Livro retirado com sucesso! Adicionado aos seus empréstimos.", "success");
+        await carregarLivros();
+        await carregarEmprestimos();
+      } catch (err) {
+        mostrarToast(err.message, "error");
+      }
+    }
+
+    // DEVOLVER LIVRO (PUT /emprestimos/:id)
+    async function devolverEmprestimo(id) {
+      try {
+        const res = await fetch(`/emprestimos/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            devolvido: true,
+            dataDevolucao: new Date().toISOString()
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || "Falha na devolução");
+
+        mostrarToast("Livro devolvido com sucesso! O exemplar voltou ao acervo.", "success");
+        await carregarLivros();
+        await carregarEmprestimos();
+      } catch (err) {
+        mostrarToast(err.message, "error");
+      }
+    }
+
+    // ADMIN: CADASTRAR LIVRO (POST /livros)
+    document.getElementById("formCriarLivro")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const titulo = document.getElementById("novoTitulo").value.trim();
+      const autor = document.getElementById("novoAutor").value.trim();
+      const isbn = document.getElementById("novoIsbn").value.trim();
+      const quantidade = Number(document.getElementById("novaQtd").value);
+
+      try {
+        const res = await fetch("/livros", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ titulo, autor, isbn, quantidade })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || "Falha ao cadastrar livro");
+
+        mostrarToast("Novo livro cadastrado com sucesso no acervo!", "success");
+        document.getElementById("formCriarLivro").reset();
+        document.getElementById("novaQtd").value = "3";
+        await carregarLivros();
+      } catch (err) {
+        mostrarToast(err.message, "error");
+      }
+    });
+
+    // ADMIN: EXCLUIR LIVRO (DELETE /livros/:id)
+    async function deletarLivro(id) {
+      if (!confirm("Confirma a exclusão deste livro do acervo da biblioteca?")) return;
+      try {
+        const res = await fetch(`/livros/${id}`, {
+          method: "DELETE",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error("Falha ao excluir o livro");
+
+        mostrarToast("Livro removido do catálogo com sucesso.", "info");
+        await carregarLivros();
+      } catch (err) {
+        mostrarToast(err.message, "error");
+      }
+    }
+
+    // MODAL DE TROCA DE SENHA
+    function abrirModalSenha() {
+      document.getElementById("modalSenha").style.display = "flex";
+      document.getElementById("formTrocarSenha").reset();
+    }
+
+    function fecharModalSenha() {
+      document.getElementById("modalSenha").style.display = "none";
+    }
+
+    document.getElementById("formTrocarSenha").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const senhaAtual = document.getElementById("senhaAtualInput").value;
+      const novaSenha = document.getElementById("novaSenhaInput").value;
+
+      try {
+        const res = await fetch("/auth/senha", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ senhaAtual, novaSenha })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.erro || "Falha ao alterar senha");
+
+        mostrarToast("Senha alterada com sucesso!", "success");
+        fecharModalSenha();
+      } catch (err) {
+        mostrarToast(err.message, "error");
+      }
+    });
+
+    // AUTO-START SE HOUVER TOKEN
+    if (token) {
+      iniciarAplicacao();
+    }
+  </script>
+</body>
+</html>

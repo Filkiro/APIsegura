@@ -1,0 +1,27 @@
+{
+  "name": "api-biblioteca",
+  "version": "1.0.0",
+  "description": "API Segura - Biblioteca: API de empréstimos com autenticação JWT e autorização por perfil e por dono",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.js",
+    "start": "tsx src/server.js",
+    "seed": "prisma db seed",
+    "testar": "node scripts/testar.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.4.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^7.0.0",
+    "tsx": "^4.20.0"
+  }
+}

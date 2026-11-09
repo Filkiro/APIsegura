@@ -1,0 +1,302 @@
+### ===================================================================
+### ATIVIDADE AVALIATIVA — PROJETO API SEGURA (ETECAMP - 3º AI)
+### TEMA 1: BIBLIOTECA (Empréstimo de Livros e Gestão de Acervo)
+### Arquivo de Testes de Requisições HTTP (REST Client / Thunder Client)
+### ===================================================================
+
+@base = http://localhost:3000
+@admin_email = admin@biblioteca.com
+@ana_email = ana@biblioteca.com
+@bruno_email = bruno@biblioteca.com
+@senha_padrao = Senha123
+
+### ===================================================================
+### 0. STATUS DA API
+### ===================================================================
+GET {{base}}/api
+
+
+### ===================================================================
+### PARTE I — BATERIA OFICIAL DE TESTES DO PDF (Cenários T1 a T10)
+### ===================================================================
+
+### -------------------------------------------------------------------
+### [LOGIN PRÉVIO PARA OS TESTES]
+### -------------------------------------------------------------------
+
+### Login ADMIN (gera token para testes T9)
+# @name loginAdmin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{admin_email}}",
+  "senha": "{{senha_padrao}}"
+}
+
+###
+
+### Login USER - Ana (gera token para testes T5, T6, T7, T8, T10)
+# @name loginAna
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{ana_email}}",
+  "senha": "{{senha_padrao}}"
+}
+
+###
+
+### Login USER - Bruno (para verificar isolamento de donos)
+# @name loginBruno
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{bruno_email}}",
+  "senha": "{{senha_padrao}}"
+}
+
+
+### -------------------------------------------------------------------
+### T1: Cadastro válido (resposta sem senha) -> Esperado: 201 Created
+### -------------------------------------------------------------------
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{
+  "nome": "Leitor Teste T1",
+  "email": "leitor_t1_{{$datetime iso8601}}@biblioteca.com",
+  "senha": "SenhaForte123"
+}
+
+### -------------------------------------------------------------------
+### T2: Cadastro com e-mail repetido -> Esperado: 409 Conflict
+### -------------------------------------------------------------------
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{
+  "nome": "Tentativa Duplicada",
+  "email": "{{ana_email}}",
+  "senha": "SenhaForte123"
+}
+
+### -------------------------------------------------------------------
+### T3: Login com senha errada -> Esperado: 401 Unauthorized
+### -------------------------------------------------------------------
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{ana_email}}",
+  "senha": "SenhaIncorreta"
+}
+
+### -------------------------------------------------------------------
+### T4: Rota protegida sem token -> Esperado: 401 Unauthorized
+### -------------------------------------------------------------------
+GET {{base}}/auth/me
+
+### -------------------------------------------------------------------
+### T5: Rota protegida com token válido -> Esperado: 200 OK
+### -------------------------------------------------------------------
+GET {{base}}/auth/me
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### -------------------------------------------------------------------
+### T6: Criar recurso tentando mandar o dono no body -> Esperado: 201 Created
+### (O leitorId=99 no body DEVE ser ignorado; a API usa o id do token da Ana = 2)
+### -------------------------------------------------------------------
+POST {{base}}/emprestimos
+Authorization: Bearer {{loginAna.response.body.token}}
+Content-Type: application/json
+
+{
+  "livroId": 1,
+  "leitorId": 99
+}
+
+### -------------------------------------------------------------------
+### T7: USER alterando recurso de outro USER -> Esperado: 403 Forbidden
+### (O empréstimo ID 2 pertence ao Bruno; a Ana tenta devolver e é barrada)
+### -------------------------------------------------------------------
+PUT {{base}}/emprestimos/2
+Authorization: Bearer {{loginAna.response.body.token}}
+Content-Type: application/json
+
+{
+  "devolvido": true,
+  "dataDevolucao": "2026-11-20T00:00:00.000Z"
+}
+
+### -------------------------------------------------------------------
+### T8: USER em rota de ADMIN -> Esperado: 403 Forbidden
+### (Ana é perfil USER e tenta listar todos os usuários cadastrados)
+### -------------------------------------------------------------------
+GET {{base}}/users
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### -------------------------------------------------------------------
+### T9: ADMIN em rota de ADMIN -> Esperado: 200 OK
+### (Administrador acessa a lista de usuários e perfis)
+### -------------------------------------------------------------------
+GET {{base}}/users
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+### -------------------------------------------------------------------
+### T10: Recurso inexistente -> Esperado: 404 Not Found
+### (Garante que a API valida a existência do recurso antes da permissão)
+### -------------------------------------------------------------------
+PUT {{base}}/emprestimos/99999
+Authorization: Bearer {{loginAna.response.body.token}}
+Content-Type: application/json
+
+{
+  "devolvido": true
+}
+
+
+### ===================================================================
+### PARTE II — CRUDS COMPLETOS E REGRAS DE NEGÓCIO DA BIBLIOTECA
+### ===================================================================
+
+### ── 1. Acervo de Livros ──────────────────────────────────────────
+
+### 1.1 Listar todos os livros (Pública - qualquer visitante pode ver)
+GET {{base}}/livros
+
+### 1.2 Detalhar livro por ID (Pública)
+GET {{base}}/livros/1
+
+### 1.3 ADMIN cadastra livro com estoque (201 Created)
+POST {{base}}/livros
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "titulo": "Grande Sertão: Veredas",
+  "autor": "Guimarães Rosa",
+  "isbn": "9788535901234",
+  "quantidade": 3
+}
+
+### 1.4 Leitor tenta cadastrar livro -> Esperado: 403 Forbidden
+POST {{base}}/livros
+Authorization: Bearer {{loginAna.response.body.token}}
+Content-Type: application/json
+
+{
+  "titulo": "Livro Não Autorizado",
+  "autor": "Invasor"
+}
+
+### 1.5 ADMIN atualiza dados de um livro (200 OK)
+PUT {{base}}/livros/1
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "titulo": "Dom Casmurro (Edição Comemorativa)",
+  "quantidade": 5
+}
+
+### 1.6 ADMIN remove livro do acervo (204 No Content)
+DELETE {{base}}/livros/5
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+
+### ── 2. Empréstimos e Devoluções ──────────────────────────────────
+
+### 2.1 ADMIN lista todos os empréstimos da biblioteca (200 OK)
+GET {{base}}/emprestimos
+Authorization: Bearer {{loginAdmin.response.body.token}}
+
+### 2.2 Leitor lista seus empréstimos via /emprestimos (200 OK - vê só os seus)
+GET {{base}}/emprestimos
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 2.3 Leitor lista seus empréstimos via /emprestimos/meus (200 OK)
+GET {{base}}/emprestimos/meus
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 2.4 Leitor consulta o próprio empréstimo por ID (200 OK)
+GET {{base}}/emprestimos/1
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 2.5 Leitor tenta consultar empréstimo alheio -> Esperado: 403 Forbidden
+GET {{base}}/emprestimos/2
+Authorization: Bearer {{loginAna.response.body.token}}
+
+### 2.6 Leitor devolve o seu próprio empréstimo (200 OK)
+PUT {{base}}/emprestimos/1
+Authorization: Bearer {{loginAna.response.body.token}}
+Content-Type: application/json
+
+{
+  "devolvido": true,
+  "dataDevolucao": "2026-11-09T21:00:00.000Z"
+}
+
+### 2.7 ADMIN devolve ou ajusta qualquer empréstimo (200 OK)
+PUT {{base}}/emprestimos/2
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "devolvido": true,
+  "dataDevolucao": "2026-11-09T21:00:00.000Z"
+}
+
+
+### ── 3. Gestão de Usuários e RBAC ─────────────────────────────────
+
+### 3.1 ADMIN altera papel de um usuário (USER -> ADMIN)
+PATCH {{base}}/users/3/role
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+### 3.2 ADMIN tenta passar role inválido -> Esperado: 400 Bad Request
+PATCH {{base}}/users/3/role
+Authorization: Bearer {{loginAdmin.response.body.token}}
+Content-Type: application/json
+
+{
+  "role": "SUPER_HEROI"
+}
+
+
+### ── 4. Extras de Segurança ──────────────────────────────────────
+
+### 4.1 Troca de senha autenticada (PATCH /auth/senha)
+PATCH {{base}}/auth/senha
+Authorization: Bearer {{loginAna.response.body.token}}
+Content-Type: application/json
+
+{
+  "senhaAtual": "Senha123",
+  "novaSenha": "NovaSenhaSegura99"
+}
+
+### 4.2 Troca de senha com senha atual incorreta -> Esperado: 401 Unauthorized
+PATCH {{base}}/auth/senha
+Authorization: Bearer {{loginAna.response.body.token}}
+Content-Type: application/json
+
+{
+  "senhaAtual": "SenhaErrada",
+  "novaSenha": "NovaSenhaSegura99"
+}
+
+### 4.3 Formato do Header Authorization inválido -> Esperado: 401 Unauthorized
+GET {{base}}/auth/me
+Authorization: FormatoErradoSemBearer {{loginAna.response.body.token}}
+
+### 4.4 Token com assinatura adulterada -> Esperado: 401 Unauthorized
+GET {{base}}/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.assinatura_falsa_adulterada

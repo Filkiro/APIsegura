@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Perfis de acesso do sistema para o controle RBAC (Requisito R2)
+enum Role {
+  USER  // Leitor comum da biblioteca
+  ADMIN // Administrador geral do acervo
+}
+
+// Modelo de Usuário: todo cadastro nasce USER por padrão e com senha em hash bcrypt
+model User {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  password  String   // Salva estritamente como hash gerado pelo bcrypt com salt
+  role      Role     @default(USER)
+  criadoEm DateTime @default(now())
+
+  // Relação 1:N exigida no Requisito R3: um leitor pode ter múltiplos empréstimos
+  emprestimos Emprestimo[]
+}
+
+// Modelo de Livros: acervo literário gerenciado pelos administradores
+model Livro {
+  id         Int      @id @default(autoincrement())
+  titulo     String
+  autor      String
+  isbn       String?  @unique
+  quantidade Int      @default(1) // Quantidade física de exemplares no acervo
+  criadoEm  DateTime @default(now())
+
+  emprestimos Emprestimo[]
+}
+
+// Recurso principal do Tema 1 (Biblioteca): representa a retirada do livro pelo leitor.
+// É nele que aplicamos a regra do dono (o leitor só acessa/devolve os seus próprios empréstimos).
+model Emprestimo {
+  id            Int       @id @default(autoincrement())
+  dataEmprestimo DateTime  @default(now())
+  dataDevolucao  DateTime?
+  devolvido      Boolean   @default(false)
+  criadoEm      DateTime  @default(now())
+  atualizadoEm  DateTime  @updatedAt
+
+  // Chave estrangeira que vincula a posse do empréstimo ao leitor (dono)
+  leitorId Int
+  leitor   User  @relation(fields: [leitorId], references: [id], onDelete: Cascade)
+
+  // Chave estrangeira apontando para o livro retirado
+  livroId  Int
+  livro    Livro @relation(fields: [livroId], references: [id], onDelete: Cascade)
+}
