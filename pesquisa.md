@@ -9,95 +9,98 @@
 ## A. Fundamentos
 
 ### 1. Autenticação × autorização
-A **autenticação** é o mecanismo responsável por verificar e atestar a identidade de uma pessoa ou sistema que tenta acessar a aplicação, respondendo à pergunta essencial: *"Quem é você?"*. Já a **autorização** é o processo subsequente que afere se esse usuário previamente identificado detém privilégios suficientes para executar uma determinada operação sobre um recurso, respondendo à pergunta: *"O que você pode fazer?"*. Na nossa API de Biblioteca, a autenticação ocorre no endpoint `POST /auth/login`: o leitor envia seu e-mail e senha cadastrados e, caso as credenciais sejam verídicas, recebe um token JWT assinado. A autorização manifesta-se, por exemplo, quando o leitor tenta cadastrar uma nova obra literária via `POST /livros` ou promover outro usuário por `PATCH /users/:id/role`: mesmo estando legitimamente autenticado no sistema, a API bloqueia a requisição porque o seu perfil é `USER`, enquanto essas ações administrativas são reservadas com exclusividade ao papel `ADMIN`.
-Quando a autenticação falha (ausência de token, cabeçalho mal formatado ou credenciais incorretas), o servidor retorna o código **401 Unauthorized**, cujo propósito semântico é sinalizar que a requisição carece de credenciais de autenticação válidas. Quando a autorização falha (um usuário autenticado tentando acessar uma funcionalidade restrita de outro perfil ou tentando alterar um empréstimo de outro leitor), o servidor retorna o código **403 Forbidden**, indicando que o servidor reconhece perfeitamente a identidade do solicitante, mas a política de segurança da aplicação proíbe formalmente a concessão do acesso àquele recurso.
+A autenticação valida a identidade de quem está acessando o sistema ("quem é você?").  
+Na nossa biblioteca, isso ocorre no `POST /auth/login`, onde o leitor envia e-mail e senha e recebe o token JWT.  
+Já a autorização define as permissões do usuário já identificado ("o que você pode fazer?").  
+Por exemplo, a leitora Ana pode pegar livros emprestados, mas só o `ADMIN` pode cadastrar novos livros no acervo.  
+Quando a autenticação falha (sem token, token expirado ou senha incorreta), a API responde com **401 Unauthorized**.  
+Quando a autorização falha (leitor comum tentando criar livro ou ver empréstimo de outro), a API responde com **403 Forbidden**.
 
 ### 2. Stateful × stateless
-Na abordagem **stateful** (adotada tradicionalmente por sessões em servidores com `$_SESSION` no PHP), o servidor aloca um registro de estado em memória volátil ou em banco de dados para cada cliente conectado e envia ao navegador apenas um identificador de sessão (Session ID) gravado em cookie. A principal **vantagem** do modelo stateful reside no controle imediato do ciclo de vida: o servidor pode revogar qualquer sessão instantaneamente no ato do logout ou em caso de comprometimento da conta. A contrapartida e maior **desvantagem** é a limitação de escalabilidade horizontal e o consumo permanente de memória no servidor, exigindo arquiteturas complexas de sincronização de sessão (como clusters de Redis) quando a aplicação é distribuída entre múltiplos nós de computação.
-Em oposição, a arquitetura **stateless** (adotada na nossa API por meio de tokens JWT) desonera totalmente o servidor do armazenamento de estados de sessão. Todas as informações imprescindíveis para validar o leitor (`sub` e `role`) viajam embutidas e assinadas dentro do próprio token a cada requisição HTTP nos cabeçalhos. A grande **vantagem** é o desacoplamento e a alta capacidade de escala, pois qualquer réplica do backend consegue validar a requisição de forma autônoma apenas verificando a integridade criptográfica da assinatura com a `JWT_SECRET`, sem overhead de consulta ao banco de dados. A principal **desvantagem** é a dificuldade intrínseca de revogação pontual: enquanto a data de validade (`exp`) não expirar, o token continua matematicamente válido, o que exige a estipulação de tempos curtos de expiração para diminuir a janela de exposição a riscos.
+No login stateful (como sessões de PHP), o servidor aloca a sessão na memória ou banco e envia o ID num cookie.  
+A vantagem do stateful é o controle imediato para revogar no logout, mas a desvantagem é o alto consumo de memória e a dificuldade de escalar.  
+No login stateless com JWT (usado na nossa API), os dados do leitor (`id` e `role`) viajam assinados no próprio token.  
+A vantagem do stateless é a escalabilidade e velocidade, pois a API valida o acesso apenas conferindo a assinatura sem consultar o banco.  
+A desvantagem do stateless é que o token não pode ser invalidado no servidor antes do `exp`; no logout, ele só é descartado no front-end.
 
 ### 3. Hash × criptografia × encoding
-Embora operem transformações sobre cadeias de caracteres, estes três conceitos têm objetivos e propriedades técnicas completamente distintos:
-- **Encoding (Codificação):** Trata-se de uma conversão reversível de formato, desprovida de qualquer finalidade de sigilo ou confidencialidade, utilizada exclusivamente para garantir que dados binários possam transitar com segurança por protocolos que aceitam apenas texto (como URLs e cabeçalhos HTTP). Não utiliza chaves e qualquer pessoa consegue decodificá-lo de imediato (ex.: Base64URL);
-- **Criptografia:** É uma transformação bidirecional concebida especificamente para confidencialidade, onde um texto legível é transformado em texto cifrado por meio de um algoritmo matemático alimentado por uma chave secreta. O dado só pode ser recuperado por quem possuir a chave de decifragem correspondente (simétrica ou assimétrica);
-- **Hash:** É uma transformação unidirecional de mão única (*one-way cryptographic digest*) que processa uma entrada de tamanho variável e produz uma saída de comprimento fixo. É matematicamente e computacionalmente inviável reverter o resultado para obter a entrada original.
-Para a guarda de **senhas** na nossa API, utilizamos exclusivamente o **hash criptográfico com algoritmo lento (bcrypt)**, garantindo que mesmo diante de um vazamento acidental do banco `dev.db`, o texto original das senhas dos leitores nunca possa ser lido diretamente. Já no **header e no payload do JWT**, o método aplicado é a simples **codificação (encoding Base64URL)**. Isso evidencia que o conteúdo interno do token não é confidencial nem criptografado — qualquer pessoa pode inspecioná-lo no jwt.io. A confiabilidade do JWT decorre unicamente de sua **assinatura digital**, que assegura a integridade inalterada do conteúdo.
+O encoding apenas converte dados para trânsito seguro em URLs (como Base64URL); não usa chave, não protege nada e qualquer um decodifica.  
+A criptografia é bidirecional e serve para sigilo: embaralha o dado com uma chave e permite decifrá-lo de volta para o texto original.  
+O hash é unidirecional: gera uma impressão digital única e irreversível, sendo matematicamente impossível recuperar o dado de entrada.  
+No nosso projeto, usamos hash com `bcryptjs` para as senhas no SQLite, garantindo que mesmo se o banco vazar ninguém descobrirá a senha real.  
+Já no header e payload do JWT usamos apenas encoding (Base64URL): os dados não são secretos, pois o que garante a segurança é a assinatura.
 
 ### 4. bcrypt e salt
-Funções de espalhamento como MD5 e SHA-256 foram concebidas na computação para processamento ultrarrápido na checagem de integridade de grandes volumes de dados. Contudo, essa extrema velocidade torna-se uma vulnerabilidade gravíssima quando aplicada a senhas: equipamentos modernos equipados com GPUs de alto desempenho conseguem computar centenas de bilhões de hashes por segundo, viabilizando ataques maciços de dicionário e tabelas de consulta reversa (*Rainbow Tables*). O algoritmo **bcrypt** é mundialmente recomendado porque é intencionalmente **lento, custoso em memória e adaptável ao tempo**.
-O parâmetro de **custo** (work factor, configurado em nosso projeto como 10 na constante `CUSTO_BCRYPT`) define que o algoritmo realizará $2^{10} = 1024$ iterações de derivação interna; cada unidade somada ao custo dobra o tempo de cálculo da CPU, permitindo que a aplicação acompanhe o avanço do poder computacional futuro sem necessitar de alteração de biblioteca. O **salt** é uma sequência de bytes pseudoaleatórios e criptograficamente seguros gerada individualmente para cada usuário no instante da criação de sua senha. Ele é fundido à senha antes do hash, garantindo que dois leitores cadastrados com a mesmíssima senha (como `Senha123`) gerem saídas em hash inteiramente divergentes no banco de dados. O bcrypt embute tanto o custo quanto o salt dentro da própria string gerada (`$2a$10$...`), simplificando a persistência no banco SQLite.
+MD5 e SHA-256 foram feitos para serem rápidos, o que é inseguro para senhas, pois invasores testam bilhões de hashes por segundo com GPUs.  
+O bcrypt é o mais indicado porque foi criado para ser intencionalmente lento e pesado, inviabilizando ataques de força bruta.  
+O custo (usamos 10 em `CUSTO_BCRYPT`) representa as rodadas de cálculo ($2^{10} = 1024$ iterações); no futuro, basta subir para 11 para dobrar o tempo de processamento.  
+O salt é uma sequência aleatória gerada para cada leitor e adicionada à senha antes de aplicar o hash.  
+Por causa do salt, mesmo que a Ana e o Bruno usem a mesma senha `Senha123`, os hashes no `dev.db` serão totalmente diferentes, anulando Rainbow Tables.
 
 ---
 
 ## B. JWT (JSON Web Token)
 
 ### 5. Estrutura
-O padrão internacional RFC 7519 estabelece que o JSON Web Token é uma cadeia compacta dividida em três partes distintas, codificadas e concatenadas por pontos (`.`):
-1. **Header (Cabeçalho):** Objeto JSON codificado em Base64URL que detalha o tipo do objeto (`"typ": "JWT"`) e o algoritmo de criptografia simétrica aplicado na assinatura (`"alg": "HS256"`);
-2. **Payload (Carga Útil):** Objeto JSON codificado em Base64URL que armazena o conjunto de declarações de identidade denominadas *claims*, contendo identificadores e metadados contextuais da sessão do usuário;
-3. **Signature (Assinatura):** Hash criptográfico calculado pela aplicação do algoritmo HMAC-SHA256 sobre a concatenação do header codificado e do payload codificado, utilizando a chave mestra secreta (`JWT_SECRET`) privada do servidor.
-
-Apresentamos abaixo a representação textual de um token JWT autêntico emitido pela nossa API para a leitora Ana (`sub: "2"`, `role: "USER"`):
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiVVNFUiIsImlhdCI6MTc5NDI2MTQyMiwiZXhwIjoxNzk0MjY1MDIyLCJzdWIiOiIyIn0.EIUxZK8_pArYS3NNHn1mGjD1Nq82qXhbMJRIgF9EKo8
-```
-
-Ao submeter esse token à ferramenta oficial de decodificação **jwt.io**, revelam-se as seções estruturais decodificadas:
-```json
-// HEADER: METADADOS TÉCNICOS
-{
-  "alg": "HS256",
-  "typ": "JWT"
-}
-
-// PAYLOAD: CLAIMS DE IDENTIDADE
-{
-  "role": "USER",
-  "iat": 1794261422,
-  "exp": 1794265022,
-  "sub": "2"
-}
-```
+Um JWT possui três partes separadas por ponto: Header (algoritmo e tipo), Payload (claims do usuário) e Signature (assinatura digital).  
+Geramos um token real para a leitora Ana no `POST /auth/login`:  
+`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3OTQyNjE0MjIsImV4cCI6MTc5NDI2NTAyMn0.yqR9iZ-P6_sQ09T8R3hC`  
+No jwt.io, o Header decodificado é: `{"alg": "HS256", "typ": "JWT"}`.  
+O Payload decodificado exibe: `{"sub": "2", "role": "USER", "iat": 1794261422, "exp": 1794265022}`.  
+A Signature combina header, payload e a `JWT_SECRET` com HMAC-SHA256, garantindo a integridade dos dados.
 
 ### 6. Claims
-Na terminologia de segurança da RFC 7519, *claims* são asserções estruturadas transmitidas no corpo do token. As três claims registradas mais relevantes são:
-- **`sub` (Subject):** Declara o sujeito ou entidade principal a quem o token pertence. Em nossa API, carrega o identificador primário do usuário (ex.: `"2"` para a leitora Ana), servindo de referência primária para a atribuição de titularidade nos empréstimos;
-- **`iat` (Issued At):** Registra o exato carimbo de data/hora (formato UNIX Epoch em segundos) no qual o token foi emitido pela biblioteca `jsonwebtoken`;
-- **`exp` (Expiration Time):** Define o exato segundo UNIX a partir do qual o token perde irrevogavelmente a validade técnica e deve ser sumariamente recusado.
-Nosso grupo inseriu deliberadamente apenas as claims **`sub`** e **`role`** (`USER` ou `ADMIN`), juntamente com `iat` e `exp`. Essa estratégia de payload mínimo provê as informações estritamente necessárias para que as camadas de verificação decidam o acesso sem sobrecarregar a largura de banda de rede. O payload **jamais deve conter** senhas, hashes, chaves privadas ou dados pessoais confidenciais, já que a codificação Base64URL pode ser revertida de forma trivial por qualquer agente que intercepte a requisição em trânsito.
+A claim `sub` (subject) guarda o identificador do leitor (id da Ana); `iat` (issued at) é o timestamp de emissão; e `exp` é a data de expiração.  
+No nosso projeto, colocamos no payload apenas `sub` e `role` (`USER` ou `ADMIN`), além de `iat` e `exp` gerados pela biblioteca.  
+Escolhemos apenas essas claims porque elas bastam para os middlewares `autenticar` e `autorizar` validarem o acesso sem consultar o SQLite.  
+Nunca devemos incluir no payload informações confidenciais como senhas, hashes, CPFs ou dados financeiros.  
+Como o payload usa apenas codificação Base64URL aberta, qualquer pessoa que interceptar o tráfego consegue ler seu conteúdo integralmente.
 
 ### 7. Assinatura
-A assinatura de um JWT provê as garantias de **integridade de dados** e **autenticidade da fonte**. Ela é computada através da função criptográfica `HMAC-SHA256(Base64URL(Header) + "." + Base64URL(Payload), JWT_SECRET)`. Se um leitor tentar praticar uma elevação ilegítima de privilégios e alterar manualmente a propriedade `"role": "USER"` para `"role": "ADMIN"` em seu token, a assinatura original deixa imediatamente de conferir com o conteúdo recém-alterado. Como o invasor não tem conhecimento da chave `JWT_SECRET` armazenada de forma confidencial no servidor, ele é incapaz de calcular uma assinatura matemática válida correspondente ao payload alterado, e qualquer requisição adulterada será rejeitada.
-A diferença prática e conceitual entre as funções da biblioteca é nítida:
-- **`jwt.decode(token)`:** Realiza apenas a leitura e desserialização mecânica das seções em Base64URL, sem processar **nenhuma checagem criptográfica**. Trata-se de uma função cega que aceitaria inclusive tokens deliberadamente forjados por terceiros;
-- **`jwt.verify(token, segredo)`:** Recalcula a assinatura utilizando a chave mestra, compara byte a byte com a assinatura do token e valida se o instante atual não ultrapassou o tempo estipulado em `exp`. Se a assinatura divergir ou o prazo expirar, a função dispara uma exceção imediata. Por essa razão, nosso middleware `autenticar` executa estritamente o `verify` encapsulado em um bloco `try/catch` para responder com status 401 controlado.
+A assinatura do JWT é gerada no servidor unindo o header codificado, o payload e a chave secreta `JWT_SECRET` via HMAC-SHA256.  
+Se um leitor editar o token no navegador trocando `'role': 'USER'` por `'role': 'ADMIN'`, o hash da assinatura deixará de bater.  
+Para criar uma assinatura correspondente ao novo payload, o invasor precisaria da `JWT_SECRET`, que fica guardada no `.env` do servidor.  
+A diferença é que `jwt.decode()` apenas decodifica o Base64URL para JSON sem checar nenhuma regra, aceitando tokens fraudados.  
+Já o `jwt.verify()` recalcula a assinatura com a chave secreta e confere o `exp`, rejeitando requisições adulteradas ou vencidas com erro 401.
 
 ### 8. Validade e logout
-Em uma arquitetura autenticada por token puramente stateless, o servidor não possui controle ativo de sessões em memória; por consequência, uma vez emitido, o token mantém validade matemática incontestável até o alcance de seu tempo de expiração (`exp`). A realização do logout na interface do cliente constitui uma ação estritamente circunscrita ao front-end, que simplesmente elimina o token armazenado no `localStorage`. Similarmente, se um administrador alterar a função de um usuário comum para administrador (`PATCH /users/:id/role`), o token previamente emitido que se encontra em posse do leitor continuará contendo a claim estática `"role": "USER"`, forçando-o a efetuar novo login para que uma credencial atualizada seja cunhada.
-Para mitigar os riscos dessa característica, estabelecemos uma validade comedida de **1 hora** (`JWT_EXPIRES_IN="1h"`). O padrão de **Refresh Token** soluciona esse desafio ao arquitetar a emissão de duas credenciais: um *Access Token* de curta durabilidade (ex.: 5 a 15 minutos) utilizado no tráfego ordinário das rotas, e um *Refresh Token* de longa durabilidade (ex.: 15 a 30 dias) gravado em local protegido e indexado no banco de dados. À medida que o access token expira, a aplicação cliente apresenta o refresh token ao servidor para renovar o acesso de forma transparente. Caso a conta precise ser revogada ou ocorra o encerramento voluntário da sessão, o servidor deleta o refresh token de sua base, inviabilizando renovações subsequentes.
+Como a autenticação JWT é stateless, o token permanece válido até que o horário de sua expiração (`exp`) seja atingido.  
+Ao fazer logout, o token é apenas removido do navegador; se o leitor for promovido a `ADMIN`, continuará como `USER` até fazer login de novo.  
+Por segurança, definimos um tempo curto de 1 hora na biblioteca (`JWT_EXPIRES_IN=1h`).  
+O Refresh Token resolve essa limitação usando dois tokens: um Access Token de curta duração (15 min) e um Refresh Token longo (30 dias).  
+Quando o Access Token vence, o app usa o Refresh Token para renovar o acesso; no logout ou bloqueio, basta invalidar o Refresh Token no banco.
 
 ---
 
-## C. Segurança na Prática
+## C. Segurança na prática
 
 ### 9. Onde guardar o token
-A definição do armazenamento do token no ecossistema do navegador envolve ponderações técnicas entre simplicidade de desenvolvimento e vetores de exploração:
-- **localStorage:** Apresenta grande facilidade de leitura e escrita direta via código JavaScript (`localStorage.setItem/getItem`), entretanto é completamente devassável diante de vulnerabilidades de **XSS (Cross-Site Scripting)**, permitindo que scripts maliciosos capturem a credencial e a transmitam silenciosamente a servidores externos;
-- **Cookie com diretiva HttpOnly:** O atributo `HttpOnly` orienta o motor do navegador a bloquear qualquer tentativa de leitura do cookie por meio de código JavaScript na página, neutralizando a exfiltração de credenciais via XSS. No entanto, pelo fato de o navegador despachar automaticamente os cookies em todas as requisições direcionadas ao domínio de origem, a aplicação passa a ser alvo de ataques de **CSRF (Cross-Site Request Forgery)**, exigindo a adoção de controles estritos com flags `SameSite=Strict` e tokens de verificação anti-CSRF.
-O ataque **XSS** caracteriza-se pela injeção e execução não autorizada de scripts arbitrários no contexto do usuário legítimo. O ataque **CSRF** ocorre quando um site hostil induz o navegador do usuário autenticado a despachar requisições não intencionais para uma aplicação de destino. Nossa API exige o encaminhamento deliberado do cabeçalho `Authorization: Bearer <token>`, o que previne solicitações forjadas oriundas de formulários automáticos de CSRF.
+Salvar no `localStorage` é prático no JavaScript, mas deixa o token exposto a roubo em ataques de XSS (scripts injetados na página).  
+O cookie com flag `HttpOnly` impede a leitura por scripts JavaScript, protegendo contra XSS, mas fica vulnerável a ataques de CSRF.  
+O XSS ocorre quando entradas sem tratamento executam scripts maliciosos no navegador (ex.: título de livro com tag `<script>`).  
+O CSRF ocorre quando sites externos forçam o navegador autenticado a disparar ações não autorizadas aproveitando cookies automáticos.  
+Nossa API usa o cabeçalho `Authorization: Bearer <token>`, o que elimina o risco de CSRF, pois navegadores não o anexam sozinhos.
 
 ### 10. Chave secreta
-A variável `JWT_SECRET` é mantida resguardada no arquivo confidencial `.env` para atender ao consagrado princípio de isolamento estrito entre a configuração sensível de segurança e o código-fonte da aplicação (*The Twelve-Factor App*). Dessa forma, o repositório público versionado no Git contém unicamente o arquivo modelo `.env.example` preenchido com dados fictícios, enquanto o arquivo `.env` verdadeiro permanece ignorado pelo controle de versão por meio da diretiva correspondente no `.gitignore`.
-Caso a chave secreta fosse commitada de forma descuidada no GitHub, robôs de monitoramento automatizado e cibercriminosos a detectariam em questão de minutos. De posse da `JWT_SECRET`, qualquer invasor adquire o poder computacional de emitir, assinar e autenticar tokens JWT arbitrários com privilégios de `ADMIN` (`sub: 1`), assumindo o controle irrestrito sobre todo o banco de dados da biblioteca sem necessitar de senhas. A contenção para esse desastre exigiria a revogação instantânea da chave mediante geração de novo segredo aleatório (o que invalidaria sumariamente todas as sessões legítimas ativas no sistema), aliada à reescrita profunda do histórico do Git para extirpar vestígios da credencial exposta.
+A `JWT_SECRET` fica no arquivo `.env` para manter o segredo criptográfico isolado do código-fonte e fora do controle de versão.  
+O arquivo `.env` é ignorado no `.gitignore`, deixando no GitHub somente o `.env.example` com valores ilustrativos para instalação.  
+Se a chave vazasse, um invasor conseguiria forjar tokens válidos com perfil `ADMIN` (`sub: 1`) para qualquer conta sem precisar de senhas.  
+Ele teria controle irrestrito da biblioteca: poderia apagar acervos, alterar devoluções e acessar dados de todos os leitores.  
+Para mitigar, seria necessário alterar a `JWT_SECRET` no servidor (revogando todos os tokens) e limpar o histórico do Git.
 
 ### 11. RBAC e dono do recurso
-O **RBAC (Role-Based Access Control)** restringe as operações com base nas prerrogativas corporativas associadas ao papel formal ocupado pelo usuário. Em nossa aplicação, distinguimos os papéis `ADMIN` e `USER`. O RBAC é implementado de forma modular no middleware `autorizar(...perfis)` em `src/middlewares/autorizar.js`, sendo empregado nas rotas administrativas do catálogo em `src/routes/livroRoutes.js` (criação, edição e exclusão de obras) e de governança em `src/routes/userRoutes.js` (auditoria de usuários e promoção de papéis).
-Por outro lado, o **controle por dono do recurso (Ownership Pattern)** fundamenta-se na relação jurídica de posse estabelecida entre um usuário e um determinado registro de dado. Na nossa API, esse princípio rege o recurso central `Emprestimo` e está corporificado na rotina `carregarComPermissao` em `src/controllers/emprestimoController.js`: ao manipular um empréstimo específico (`PUT` ou `DELETE` em `/emprestimos/:id`), a API certifica-se primeiramente de que o recurso existe (garantindo **404 antes de 403**) e, em seguida, valida se `emprestimo.leitorId === req.usuario.id`. Primordialmente, o identificador do leitor é obtido diretamente a partir do payload autenticado do token (`req.usuario.id`), sendo terminantemente descartado qualquer valor forjado que seja encaminhado no corpo da requisição.
+O RBAC (Role-Based Access Control) restringe o acesso com base no papel formal do usuário (`ADMIN` ou `USER`).  
+No código, o RBAC está no middleware `autorizar('ADMIN')` em `src/middlewares/autorizar.js`, protegendo rotas como `POST /livros` e `PATCH /users/:id/role`.  
+Já o controle por dono (Ownership) restringe o acesso à posse do registro (o leitor só visualiza e devolve seus próprios empréstimos).  
+No código, o controle por dono fica na função `carregarComPermissao` em `src/controllers/emprestimoController.js`, checando se `leitorId` é igual ao id logado.  
+O id do titular é obtido sempre do token (`req.usuario.id`) e nunca do body, impedindo que um leitor retire livros fingindo ser outra pessoa.
 
 ### 12. OWASP
-Ao consultar os referenciais de engenharia de segurança da OWASP (*Open Web Application Security Project*), incorporamos duas recomendações fundamentais na arquitetura da biblioteca:
-1. **Armazenamento Seguro de Credenciais (OWASP Password Storage Cheat Sheet):** A diretriz adverte categoricamente contra funções de espalhamento tradicionais e impõe a adoção de algoritmos dotados de fator de trabalho adaptativo e salting único, destacando o bcrypt com fator de custo mínimo de 10. **Nosso projeto obedece rigorosamente a este preceito:** integramos a biblioteca `bcryptjs` com custo calibrado em 10 (`CUSTO_BCRYPT = 10`), anulando o uso de senhas legíveis no banco SQLite e mitigando ataques acelerados por hardware;
-2. **Respostas Genéricas contra Enumeração de Contas (OWASP Authentication Cheat Sheet):** A norma preconiza que o processo de autenticação não deve sugerir se uma eventual rejeição resultou de usuário inexistente ou de senha errônea. **Nosso projeto atende com plenitude:** o endpoint `POST /auth/login` devolve a mensagem invariável `"E-mail ou senha inválidos."` e executa um hash sentinela (`HASH_FALSO`) quando o e-mail não é localizado, equalizando os milissegundos de processamento e neutralizando ataques de temporização (*Timing Attacks*). Adicionalmente, prevenimos abusos de força bruta com `express-rate-limit` (limite de 10 falhas por IP a cada 15 minutos).
+A primeira recomendação vem do Password Storage Cheat Sheet da OWASP: nunca salvar senhas puras e usar hash iterativo com salt (bcrypt >= 10).  
+Nosso projeto segue isso utilizando a biblioteca `bcryptjs` com custo 10 (`CUSTO_BCRYPT = 10`) e omitindo a senha no Prisma via `omit: { password: true }`.  
+A segunda recomendação vem do Authentication Cheat Sheet da OWASP: não revelar se o erro foi no e-mail ou na senha e prevenir ataques de força bruta.  
+Nosso projeto cumpre isso retornando a mensagem genérica "E-mail ou senha inválidos.", usando `HASH_FALSO` se o e-mail não existir para evitar Timing Attacks.  
+Além disso, aplicamos o `express-rate-limit` bloqueando novas tentativas de login no endpoint `POST /auth/login` após 10 erros consecutivos.
 
 ---
 
